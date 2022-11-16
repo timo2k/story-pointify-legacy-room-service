@@ -6,12 +6,15 @@ import (
 )
 
 const (
-	OnSendEstimation = "send-estimation"
-	OnJoinRoom       = "join-room"
-	OnLeaveRoom      = "leave-room"
-	OnUserJoined     = "user-join"
-	OnUserLeft       = "user-left"
-	OnRoomJoined     = "room-joined"
+	OnSendEstimation    = "send-estimation"
+	OnResetEstimations  = "reset-estimations"
+	OnHideEstimations   = "hide-estimations"
+	OnRevealEstimations = "reveal-estimations"
+	OnJoinRoom          = "join-room"
+	OnLeaveRoom         = "leave-room"
+	OnUserJoined        = "user-join"
+	OnUserLeft          = "user-left"
+	OnRoomJoined        = "room-joined"
 )
 
 type Payload struct {
