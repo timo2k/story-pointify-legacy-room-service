@@ -163,17 +163,17 @@ func (client *Client) handleNewPayload(jsonPayload []byte) {
 
 	payload.Sender = client
 
-	switch payload.Action {
-	case SendEstimationAction:
+	switch payload.Event {
+	case OnSendEstimation:
 		roomId := payload.Target.GetId()
 		if room := client.wsServer.findRoomById(roomId); room != nil {
 			room.broadcast <- &payload
 		}
 
-	case JoinRoomAction:
+	case OnJoinRoom:
 		client.handleJoinRoomPayload(payload)
 
-	case LeaveRoomAction:
+	case OnLeaveRoom:
 		client.handleLeaveRoomPayload(payload)
 	}
 }
@@ -221,7 +221,7 @@ func (client *Client) isInRoom(room *Room) bool {
 
 func (client *Client) notifyRoomJoined(room *Room, sender *Client) {
 	payload := Payload{
-		Action: RoomJoinedAction,
+		Event:  OnRoomJoined,
 		Target: room,
 		Sender: sender,
 	}

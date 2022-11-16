@@ -6,16 +6,16 @@ import (
 )
 
 const (
-	SendEstimationAction = "send-estimation"
-	JoinRoomAction       = "join-room"
-	LeaveRoomAction      = "leave-room"
-	UserJoinedAction     = "user-join"
-	UserLeftAction       = "user-left"
-	RoomJoinedAction     = "room-joined"
+	OnSendEstimation = "send-estimation"
+	OnJoinRoom       = "join-room"
+	OnLeaveRoom      = "leave-room"
+	OnUserJoined     = "user-join"
+	OnUserLeft       = "user-left"
+	OnRoomJoined     = "room-joined"
 )
 
 type Payload struct {
-	Action            string  `json:"action"`
+	Event             string  `json:"event"`
 	Target            *Room   `json:"target"`
 	Sender            *Client `json:"sender"`
 	Message           string  `json:"message"`
