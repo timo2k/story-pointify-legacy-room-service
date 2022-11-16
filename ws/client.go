@@ -1,11 +1,32 @@
 package ws
 
 import (
+	"encoding/json"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
+)
+
+const (
+	// Max wait time when writing message to peer
+	writeWait = 10 * time.Second
+
+	// Max time till next pong from peer
+	pongWait = 60 * time.Second
+
+	// Send ping interval, must be less then pong wait time
+	pingPeriod = (pongWait * 9) / 10
+
+	// Maximum message size allowed from peer.
+	maxPayloadSize = 10000
+)
+
+var (
+	newline = []byte{'\n'}
+	space   = []byte{' '}
 )
 
 var upgrader = websocket.Upgrader{
@@ -33,6 +54,70 @@ func newClient(conn *websocket.Conn, wsServer *WsServer, name string) *Client {
 	}
 }
 
+func (client *Client) readPump() {
+	defer func() {
+		client.disconnect()
+	}()
+
+	client.conn.SetReadLimit(maxPayloadSize)
+	client.conn.SetReadDeadline(time.Now().Add(pongWait))
+	client.conn.SetPongHandler(func(string) error { client.conn.SetReadDeadline(time.Now().Add(pongWait)); return nil })
+
+	// Start endless read loop, waiting for messages from client
+	for {
+		_, jsonPayload, err := client.conn.ReadMessage()
+		if err != nil {
+			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
+				log.Printf("unexpected close error %v", err)
+			}
+			break
+		}
+
+		client.handleNewPayload(jsonPayload)
+	}
+}
+
+func (client *Client) writePump() {
+	ticker := time.NewTicker(pingPeriod)
+	defer func() {
+		ticker.Stop()
+		client.conn.Close()
+	}()
+
+	for {
+		select {
+		case message, ok := <-client.send:
+			client.conn.SetWriteDeadline(time.Now().Add(writeWait))
+			if !ok {
+				client.conn.WriteMessage(websocket.CloseMessage, []byte{})
+				return
+			}
+
+			w, err := client.conn.NextWriter(websocket.TextMessage)
+			if err != nil {
+				return
+			}
+			w.Write(message)
+
+			n := len(client.send)
+			for i := 0; i < n; i++ {
+				w.Write(newline)
+				w.Write(<-client.send)
+			}
+
+			if err := w.Close(); err != nil {
+				return
+			}
+
+		case <-ticker.C:
+			client.conn.SetWriteDeadline(time.Now().Add(writeWait))
+			if err := client.conn.WriteMessage(websocket.PingMessage, nil); err != nil {
+				return
+			}
+		}
+	}
+}
+
 func ServeWs(wsServer *WsServer, w http.ResponseWriter, r *http.Request) {
 	name, ok := r.URL.Query()["name"]
 
@@ -54,10 +139,54 @@ func ServeWs(wsServer *WsServer, w http.ResponseWriter, r *http.Request) {
 
 	client := newClient(conn, wsServer, name[0])
 
-	//TODO Write & Readpumps
+	go client.writePump()
+	go client.readPump()
 
 	wsServer.register <- client
 }
+
+func (client *Client) disconnect() {
+	client.wsServer.unregister <- client
+	for room := range client.rooms {
+		room.unregister <- client
+	}
+	close(client.send)
+	client.conn.Close()
+}
+
+func (client *Client) handleNewPayload(jsonPayload []byte) {
+	var payload Payload
+	if err := json.Unmarshal(jsonPayload, &payload); err != nil {
+		log.Printf("Error on unmarshal JSON message %s", err)
+		return
+	}
+
+	payload.Sender = client
+
+	switch payload.Action {
+	case SendEstimationAction:
+		roomId := payload.Target.GetId()
+		if room := client.wsServer.findRoomById(roomId); room != nil {
+			room.broadcast <- &payload
+		}
+
+	case JoinRoomAction:
+		client.handleJoinRoomPayload(payload)
+
+	case LeaveRoomAction:
+		client.handleLeaveRoomPayload(payload)
+	}
+}
+
+func (client *Client) handleJoinRoomPayload(payload Payload) {}
+
+func (client *Client) handleLeaveRoomPayload(payload Payload) {}
+
+func (client *Client) joinRoom(roomName string, sender *Client) {}
+
+func (client *Client) isInRoom(room *Room) {}
+
+func (client *Client) notifyRoomJoined(room *Room, sender *Client) {}
 
 func (client *Client) GetId() string {
 	return client.ID.String()
