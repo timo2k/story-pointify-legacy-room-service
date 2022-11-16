@@ -21,3 +21,11 @@ func NewRoom(title string) *Room {
 		broadcast:  make(chan *Payload),
 	}
 }
+
+func (room *Room) GetId() string {
+	return room.ID.String()
+}
+
+func (room *Room) GetTitle() string {
+	return room.Title
+}

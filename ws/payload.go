@@ -21,7 +21,7 @@ type Payload struct {
 	CurrentEstimation string  `json:"current-estimation"`
 }
 
-func (payload *Payload) endocde() []byte {
+func (payload *Payload) encode() []byte {
 	json, err := json.Marshal(payload)
 	if err != nil {
 		log.Println(err)
