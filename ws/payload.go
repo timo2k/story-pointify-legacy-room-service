@@ -18,6 +18,7 @@ type Payload struct {
 	Action            string  `json:"action"`
 	Target            *Room   `json:"target"`
 	Sender            *Client `json:"sender"`
+	Message           string  `json:"message"`
 	CurrentEstimation string  `json:"current-estimation"`
 }
 

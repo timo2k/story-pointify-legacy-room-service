@@ -118,7 +118,6 @@ func (server *WsServer) findClientByName(name string) *Client {
 }
 
 func (server *WsServer) createRoom(title string) *Room {
-	//TODO: Implement
 
 	return nil
 }

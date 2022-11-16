@@ -178,15 +178,56 @@ func (client *Client) handleNewPayload(jsonPayload []byte) {
 	}
 }
 
-func (client *Client) handleJoinRoomPayload(payload Payload) {}
+func (client *Client) handleJoinRoomPayload(payload Payload) {
+	roomTitle := payload.Message
 
-func (client *Client) handleLeaveRoomPayload(payload Payload) {}
+	client.joinRoom(roomTitle, nil)
+}
 
-func (client *Client) joinRoom(roomName string, sender *Client) {}
+func (client *Client) handleLeaveRoomPayload(payload Payload) {
+	room := client.wsServer.findRoomById(payload.Message)
+	if room == nil {
+		return
+	}
 
-func (client *Client) isInRoom(room *Room) {}
+	if _, ok := client.rooms[room]; ok {
+		delete(client.rooms, room)
+	}
 
-func (client *Client) notifyRoomJoined(room *Room, sender *Client) {}
+	room.unregister <- client
+}
+
+func (client *Client) joinRoom(roomTitle string, sender *Client) {
+	room := client.wsServer.findRoomByTitle(roomTitle)
+	if room == nil {
+		room = client.wsServer.createRoom(roomTitle)
+	}
+
+	if !client.isInRoom(room) {
+		client.rooms[room] = true
+		room.register <- client
+
+		client.notifyRoomJoined(room, sender)
+	}
+}
+
+func (client *Client) isInRoom(room *Room) bool {
+	if _, ok := client.rooms[room]; ok {
+		return true
+	}
+
+	return false
+}
+
+func (client *Client) notifyRoomJoined(room *Room, sender *Client) {
+	payload := Payload{
+		Action: RoomJoinedAction,
+		Target: room,
+		Sender: sender,
+	}
+
+	client.send <- payload.encode()
+}
 
 func (client *Client) GetId() string {
 	return client.ID.String()
