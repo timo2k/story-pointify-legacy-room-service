@@ -2,6 +2,7 @@ package ws
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/google/uuid"
 )
@@ -44,17 +45,30 @@ func (room *Room) runRoom() {
 func (room *Room) registerClientInRoom(client *Client) {
 	room.notifyClientJoined(client)
 	room.clients[client] = true
+	room.listOnlineClients(client)
+	log.Printf("User: %s successfully joined Room: %s", client.GetName(), room.GetTitle())
 }
 
 func (room *Room) unregisterClientInRoom(client *Client) {
 	if _, ok := room.clients[client]; ok {
 		delete(room.clients, client)
+		log.Printf("User: %s successfully leaved Room", client.GetName())
 	}
 }
 
 func (room *Room) broadcastToClientsInRoom(payload []byte) {
 	for client := range room.clients {
 		client.send <- payload
+	}
+}
+
+func (room *Room) listOnlineClients(client *Client) {
+	for existingClient := range room.clients {
+		payload := &Payload{
+			Event:  OnListOnlineClients,
+			Sender: existingClient,
+		}
+		client.send <- payload.encode()
 	}
 }
 

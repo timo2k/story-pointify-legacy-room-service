@@ -1,5 +1,7 @@
 package ws
 
+import "log"
+
 type WsServer struct {
 	clients    map[*Client]bool
 	register   chan *Client
@@ -36,12 +38,14 @@ func (server *WsServer) Run() {
 func (server *WsServer) registerClient(client *Client) {
 	server.notifyClientJoined(client)
 	server.clients[client] = true
+	log.Printf("User: %s successfully joined", client.GetName())
 }
 
 func (server *WsServer) unregisterClient(client *Client) {
 	if _, ok := server.clients[client]; ok {
 		delete(server.clients, client)
 		server.notifyClientLeft(client)
+		log.Printf("User: %s successfully leaved", client.GetName())
 	}
 }
 

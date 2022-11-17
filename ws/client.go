@@ -181,7 +181,7 @@ func (client *Client) handleNewPayload(jsonPayload []byte) {
 func (client *Client) handleJoinRoomPayload(payload Payload) {
 	roomTitle := payload.Message
 
-	client.joinRoom(roomTitle, nil)
+	client.joinRoom(roomTitle, client)
 }
 
 func (client *Client) handleLeaveRoomPayload(payload Payload) {

@@ -16,6 +16,7 @@ const (
 	OnUserJoined        = "user-join"
 	OnUserLeft          = "user-left"
 	OnRoomJoined        = "room-joined"
+	OnListOnlineClients = "list-online-clients"
 )
 
 type Payload struct {
