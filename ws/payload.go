@@ -10,6 +10,7 @@ const (
 	OnResetEstimations  = "reset-estimations"
 	OnHideEstimations   = "hide-estimations"
 	OnRevealEstimations = "reveal-estimations"
+	OnSendMessage       = "send-message"
 	OnJoinRoom          = "join-room"
 	OnLeaveRoom         = "leave-room"
 	OnUserJoined        = "user-join"

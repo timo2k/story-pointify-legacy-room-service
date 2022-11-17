@@ -118,6 +118,9 @@ func (server *WsServer) findClientByName(name string) *Client {
 }
 
 func (server *WsServer) createRoom(title string) *Room {
+	room := NewRoom(title)
+	go room.runRoom()
+	server.rooms[room] = true
 
-	return nil
+	return room
 }
