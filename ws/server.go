@@ -51,7 +51,7 @@ func (server *WsServer) unregisterClient(client *Client) {
 
 func (server *WsServer) notifyClientJoined(client *Client) {
 	payload := &Payload{
-		Event:  OnUserJoined,
+		Event:  OnUserJoinedServer,
 		Sender: client,
 	}
 
@@ -60,7 +60,7 @@ func (server *WsServer) notifyClientJoined(client *Client) {
 
 func (server *WsServer) notifyClientLeft(client *Client) {
 	payload := &Payload{
-		Event:  OnUserLeft,
+		Event:  OnUserLeftServer,
 		Sender: client,
 	}
 

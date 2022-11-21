@@ -221,7 +221,7 @@ func (client *Client) isInRoom(room *Room) bool {
 
 func (client *Client) notifyRoomJoined(room *Room, sender *Client) {
 	payload := Payload{
-		Event:  OnRoomJoined,
+		Event:  OnDebugEvent,
 		Target: room,
 		Sender: sender,
 	}

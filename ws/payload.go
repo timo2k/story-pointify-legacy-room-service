@@ -13,10 +13,12 @@ const (
 	OnSendMessage       = "send-message"
 	OnJoinRoom          = "join-room"
 	OnLeaveRoom         = "leave-room"
-	OnUserJoined        = "user-join"
-	OnUserLeft          = "user-left"
-	OnRoomJoined        = "room-joined"
+	OnUserJoinedServer  = "user-joined-server"
+	OnUserLeftServer    = "user-left-server"
+	OnUserRoomJoined    = "user-room-joined"
+	OnUserRoomLeft      = "user-room-left"
 	OnListOnlineClients = "list-online-clients"
+	OnDebugEvent        = "debug"
 )
 
 type Payload struct {

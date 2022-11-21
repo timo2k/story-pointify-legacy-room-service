@@ -1,7 +1,6 @@
 package ws
 
 import (
-	"fmt"
 	"log"
 
 	"github.com/google/uuid"
@@ -43,8 +42,12 @@ func (room *Room) runRoom() {
 }
 
 func (room *Room) registerClientInRoom(client *Client) {
-	room.notifyClientJoined(client)
+	if len(room.clients) != 0 {
+		room.notifyClientJoinedRoom(client)
+	}
+
 	room.clients[client] = true
+
 	room.listOnlineClients(client)
 	log.Printf("User: %s successfully joined Room: %s", client.GetName(), room.GetTitle())
 }
@@ -52,6 +55,7 @@ func (room *Room) registerClientInRoom(client *Client) {
 func (room *Room) unregisterClientInRoom(client *Client) {
 	if _, ok := room.clients[client]; ok {
 		delete(room.clients, client)
+		room.notifyClientLeftRoom(client)
 		log.Printf("User: %s successfully leaved Room", client.GetName())
 	}
 }
@@ -62,6 +66,24 @@ func (room *Room) broadcastToClientsInRoom(payload []byte) {
 	}
 }
 
+func (room *Room) notifyClientJoinedRoom(client *Client) {
+	payload := &Payload{
+		Event:  OnUserRoomJoined,
+		Sender: client,
+	}
+
+	room.broadcastToClientsInRoom(payload.encode())
+}
+
+func (room *Room) notifyClientLeftRoom(client *Client) {
+	payload := &Payload{
+		Event:  OnUserRoomLeft,
+		Sender: client,
+	}
+
+	room.broadcastToClientsInRoom(payload.encode())
+}
+
 func (room *Room) listOnlineClients(client *Client) {
 	for existingClient := range room.clients {
 		payload := &Payload{
@@ -70,16 +92,6 @@ func (room *Room) listOnlineClients(client *Client) {
 		}
 		client.send <- payload.encode()
 	}
-}
-
-func (room *Room) notifyClientJoined(client *Client) {
-	payload := &Payload{
-		Event:   OnSendMessage,
-		Target:  room,
-		Message: fmt.Sprintf("Hallo %s", client.GetName()),
-	}
-
-	room.broadcastToClientsInRoom(payload.encode())
 }
 
 func (room *Room) GetId() string {
