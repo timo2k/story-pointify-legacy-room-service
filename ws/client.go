@@ -35,22 +35,24 @@ var upgrader = websocket.Upgrader{
 }
 
 type Client struct {
-	ID       uuid.UUID `json:"id"`
-	Name     string    `json:"name"`
-	conn     *websocket.Conn
-	wsServer *WsServer
-	send     chan []byte
-	rooms    map[*Room]bool
+	ID                uuid.UUID `json:"id"`
+	Name              string    `json:"name"`
+	CurrentEstimation string    `json:"current-estimation"`
+	conn              *websocket.Conn
+	wsServer          *WsServer
+	send              chan []byte
+	rooms             map[*Room]bool
 }
 
 func newClient(conn *websocket.Conn, wsServer *WsServer, name string) *Client {
 	return &Client{
-		ID:       uuid.New(),
-		Name:     name,
-		conn:     conn,
-		wsServer: wsServer,
-		send:     make(chan []byte, 256),
-		rooms:    make(map[*Room]bool),
+		ID:                uuid.New(),
+		Name:              name,
+		CurrentEstimation: "0",
+		conn:              conn,
+		wsServer:          wsServer,
+		send:              make(chan []byte, 256),
+		rooms:             make(map[*Room]bool),
 	}
 }
 
@@ -164,7 +166,9 @@ func (client *Client) handleNewPayload(jsonPayload []byte) {
 	payload.Sender = client
 
 	switch payload.Event {
+
 	case OnSendEstimation:
+		client.handleSendEstimation(payload)
 		roomId := payload.Target.GetId()
 		if room := client.wsServer.findRoomById(roomId); room != nil {
 			room.broadcast <- &payload
@@ -176,6 +180,10 @@ func (client *Client) handleNewPayload(jsonPayload []byte) {
 	case OnLeaveRoom:
 		client.handleLeaveRoomPayload(payload)
 	}
+}
+
+func (client *Client) handleSendEstimation(payload Payload) {
+	client.CurrentEstimation = payload.Message
 }
 
 func (client *Client) handleJoinRoomPayload(payload Payload) {
@@ -221,7 +229,7 @@ func (client *Client) isInRoom(room *Room) bool {
 
 func (client *Client) notifyRoomJoined(room *Room, sender *Client) {
 	payload := Payload{
-		Event:  OnDebugEvent,
+		Event:  OnRoomJoined,
 		Target: room,
 		Sender: sender,
 	}

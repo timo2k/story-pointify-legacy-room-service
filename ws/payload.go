@@ -18,15 +18,14 @@ const (
 	OnUserRoomJoined    = "user-room-joined"
 	OnUserRoomLeft      = "user-room-left"
 	OnListOnlineClients = "list-online-clients"
-	OnDebugEvent        = "debug"
+	OnRoomJoined        = "room-joined"
 )
 
 type Payload struct {
-	Event             string  `json:"event"`
-	Target            *Room   `json:"target"`
-	Sender            *Client `json:"sender"`
-	Message           string  `json:"message"`
-	CurrentEstimation string  `json:"current-estimation"`
+	Event   string  `json:"event"`
+	Target  *Room   `json:"target"`
+	Sender  *Client `json:"sender"`
+	Message string  `json:"message"`
 }
 
 func (payload *Payload) encode() []byte {
