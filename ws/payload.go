@@ -6,19 +6,20 @@ import (
 )
 
 const (
-	OnSendEstimation    = "send-estimation"
-	OnResetEstimations  = "reset-estimations"
-	OnHideEstimations   = "hide-estimations"
-	OnRevealEstimations = "reveal-estimations"
-	OnSendMessage       = "send-message"
-	OnJoinRoom          = "join-room"
-	OnLeaveRoom         = "leave-room"
-	OnUserJoinedServer  = "user-joined-server"
-	OnUserLeftServer    = "user-left-server"
-	OnUserRoomJoined    = "user-room-joined"
-	OnUserRoomLeft      = "user-room-left"
-	OnListOnlineClients = "list-online-clients"
-	OnRoomJoined        = "room-joined"
+	OnSendEstimation        = "send-estimation"
+	OnResetEstimations      = "reset-estimations"
+	OnHideEstimations       = "hide-estimations"
+	OnRevealEstimations     = "reveal-estimations"
+	OnSendMessage           = "send-message"
+	OnJoinRoom              = "join-room"
+	OnLeaveRoom             = "leave-room"
+	OnUserJoinedServer      = "user-joined-server"
+	OnUserLeftServer        = "user-left-server"
+	OnUserRoomJoined        = "user-room-joined"
+	OnUserRoomLeft          = "user-room-left"
+	OnListOnlineClients     = "list-online-clients"
+	OnRoomJoined            = "room-joined"
+	OnToggleHideEstimations = "toggle-hide-estimations"
 )
 
 type Payload struct {

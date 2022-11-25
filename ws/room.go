@@ -7,22 +7,24 @@ import (
 )
 
 type Room struct {
-	ID         uuid.UUID `json:"id"`
-	Title      string    `json:"title"`
-	clients    map[*Client]bool
-	register   chan *Client
-	unregister chan *Client
-	broadcast  chan *Payload
+	ID                   uuid.UUID `json:"id"`
+	Title                string    `json:"title"`
+	HasHiddenEstimations bool      `json:"has-hidden-estimations"`
+	clients              map[*Client]bool
+	register             chan *Client
+	unregister           chan *Client
+	broadcast            chan *Payload
 }
 
 func NewRoom(title string) *Room {
 	return &Room{
-		ID:         uuid.New(),
-		Title:      title,
-		clients:    make(map[*Client]bool),
-		register:   make(chan *Client),
-		unregister: make(chan *Client),
-		broadcast:  make(chan *Payload),
+		ID:                   uuid.New(),
+		Title:                title,
+		HasHiddenEstimations: false,
+		clients:              make(map[*Client]bool),
+		register:             make(chan *Client),
+		unregister:           make(chan *Client),
+		broadcast:            make(chan *Payload),
 	}
 }
 

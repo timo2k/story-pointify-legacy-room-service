@@ -174,6 +174,13 @@ func (client *Client) handleNewPayload(jsonPayload []byte) {
 			room.broadcast <- &payload
 		}
 
+	case OnToggleHideEstimations:
+		roomId := payload.Target.GetId()
+		if room := client.wsServer.findRoomById(roomId); room != nil {
+			room.HasHiddenEstimations = !room.HasHiddenEstimations
+			room.broadcast <- &payload
+		}
+
 	case OnJoinRoom:
 		client.handleJoinRoomPayload(payload)
 
