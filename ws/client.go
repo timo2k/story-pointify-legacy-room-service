@@ -169,15 +169,28 @@ func (client *Client) handleNewPayload(jsonPayload []byte) {
 
 	case OnSendEstimation:
 		client.handleSendEstimation(payload)
+
+		if payload.Target == nil {
+			log.Println("Target is null :(")
+			return
+		}
+
 		roomId := payload.Target.GetId()
 		if room := client.wsServer.findRoomById(roomId); room != nil {
 			room.broadcast <- &payload
 		}
 
 	case OnToggleHideEstimations:
+
+		if payload.Target == nil {
+			log.Println("Target is null :(")
+			return
+		}
+
 		roomId := payload.Target.GetId()
 		if room := client.wsServer.findRoomById(roomId); room != nil {
-			room.HasHiddenEstimations = !room.HasHiddenEstimations
+			payload.Target.HasHiddenEstimations = client.handleToggleShowAndHideEstimations(payload)
+			room.HasHiddenEstimations = client.handleToggleShowAndHideEstimations(payload)
 			room.broadcast <- &payload
 		}
 
@@ -191,6 +204,16 @@ func (client *Client) handleNewPayload(jsonPayload []byte) {
 
 func (client *Client) handleSendEstimation(payload Payload) {
 	client.CurrentEstimation = payload.Message
+}
+
+func (client *Client) handleToggleShowAndHideEstimations(payload Payload) bool {
+	switch payload.Message {
+	case "hide":
+		return true
+	case "show":
+		return false
+	}
+	return false
 }
 
 func (client *Client) handleJoinRoomPayload(payload Payload) {
