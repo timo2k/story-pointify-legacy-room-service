@@ -1,11 +1,15 @@
-FROM golang:1 as builder
+FROM golang:1.16-alpine
 
-WORKDIR /go/src/app
-COPY *.go .
+WORKDIR /app
 
+COPY go.mod ./
+COPY go.sum ./
 RUN go mod download
-RUN CGO_ENABLED=0 go build .
 
-FROM alpine
-COPY --from=builder /go/src/app/app .
-CMD ["./app"]
+COPY . ./
+
+RUN go build -o /room-service
+
+EXPOSE 1337
+
+CMD [ "/room-service" ]
