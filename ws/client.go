@@ -8,6 +8,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
+	"github.com/story-pointify/room-service/utils"
 )
 
 const (
@@ -37,6 +38,7 @@ var upgrader = websocket.Upgrader{
 type Client struct {
 	ID                uuid.UUID `json:"id"`
 	Name              string    `json:"name"`
+	Title             string    `json:"title"`
 	CurrentEstimation string    `json:"current-estimation"`
 	conn              *websocket.Conn
 	wsServer          *WsServer
@@ -48,6 +50,7 @@ func newClient(conn *websocket.Conn, wsServer *WsServer, name string) *Client {
 	return &Client{
 		ID:                uuid.New(),
 		Name:              name,
+		Title:             utils.GenerateRandomDinoName(),
 		CurrentEstimation: "0",
 		conn:              conn,
 		wsServer:          wsServer,
