@@ -1,0 +1,9 @@
+version: '3'
+services:
+  room-service:
+    image: riesenkuh/room-service:latest
+    container_name: room-service
+    hostname: room-service
+    restart: unless-stopped
+    ports:
+      - '1337:1337'
