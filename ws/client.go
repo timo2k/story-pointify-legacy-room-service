@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -40,6 +42,7 @@ type Client struct {
 	Name              string    `json:"name"`
 	Title             string    `json:"title"`
 	CurrentEstimation string    `json:"current-estimation"`
+	IsSpectator       bool      `json:"is-spectator"`
 	conn              *websocket.Conn
 	wsServer          *WsServer
 	send              chan []byte
@@ -52,6 +55,7 @@ func newClient(conn *websocket.Conn, wsServer *WsServer, name string) *Client {
 		Name:              name,
 		Title:             utils.GenerateRandomDinoName(),
 		CurrentEstimation: "0",
+		IsSpectator:       false,
 		conn:              conn,
 		wsServer:          wsServer,
 		send:              make(chan []byte, 256),
@@ -220,9 +224,23 @@ func (client *Client) handleToggleShowAndHideEstimations(payload Payload) bool {
 }
 
 func (client *Client) handleJoinRoomPayload(payload Payload) {
-	roomTitle := payload.Message
 
-	client.joinRoom(roomTitle, client)
+	// slice message string into array to get the title and specator flag for join room payload
+	titleAndSpectatorFlag := strings.Split(payload.Message, ";")
+
+	if len(titleAndSpectatorFlag) >= 2 {
+		roomTitle := titleAndSpectatorFlag[0]
+		isSpectator, err := strconv.ParseBool(titleAndSpectatorFlag[1])
+
+		if err != nil {
+			log.Println("Cannot cast isSpectator string to boolean")
+			client.joinRoom(roomTitle, false, client)
+			return
+		}
+
+		client.joinRoom(roomTitle, isSpectator, client)
+	}
+
 }
 
 func (client *Client) handleLeaveRoomPayload(payload Payload) {
@@ -238,7 +256,9 @@ func (client *Client) handleLeaveRoomPayload(payload Payload) {
 	room.unregister <- client
 }
 
-func (client *Client) joinRoom(roomTitle string, sender *Client) {
+func (client *Client) joinRoom(roomTitle string, isSpectator bool, sender *Client) {
+	client.IsSpectator = isSpectator
+
 	room := client.wsServer.findRoomByTitle(roomTitle)
 	if room == nil {
 		room = client.wsServer.createRoom(roomTitle)
