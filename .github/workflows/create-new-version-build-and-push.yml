@@ -26,13 +26,13 @@ jobs:
           git push origin $NEXT_VERSION
       - name: Build Docker Image
         run: |
-          echo "Building image with tag: ${NEXT_VERSION}"
-          docker build -t ${DOCKER_USERNAME}/room-service:${NEXT_VERSION} .
+          echo "Building image with tag: $NEXT_VERSION"
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/room-service:$NEXT_VERSION .
       - name: Tag with latest
-        run: docker tag ${DOCKER_USERNAME}/room-service:${NEXT_VERSION} ${DOCKER_USERNAME}/room-service:latest
+        run: docker tag ${{ secrets.DOCKER_USERNAME }}/room-service:${NEXT_VERSION} ${{ secrets.DOCKER_USERNAME }}/room-service:latest
       - name: Login to Docker Hub
         run: echo ${{ secrets.DOCKER_PASSWORD }} | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
       - name: Push Docker Image
         run: |
-          docker push ${DOCKER_USERNAME}/my-image:${NEXT_VERSION}
-          docker push ${DOCKER_USERNAME}/my-image:latest
+          docker push ${{ secrets.DOCKER_USERNAME }}/my-image:$NEXT_VERSION
+          docker push ${{ secrets.DOCKER_USERNAME }}/my-image:latest
